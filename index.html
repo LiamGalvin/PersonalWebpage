@@ -71,6 +71,7 @@
             text-decoration: none;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -127,35 +128,60 @@
                 <!-- Data will be dynamically loaded here -->
             </tbody>
         </table>
-        <!-- Example data for transcript -->
-<script>
-    var transcriptData = [
-        ["Semester 1", "CS101", "Introduction to Computer Science", "3", "85", "82.5"],
-        ["Semester 1", "MATH101", "Calculus", "4", "90", "82.5"],
-        ["Semester 2", "CS201", "Data Structures", "4", "88", "86"],
-        ["Semester 2", "ENG101", "English Composition", "3", "75", "86"],
-        ["Semester 3", "CS301", "Algorithms", "4", "92", "92"]
-        // Add more rows as needed
-    ];
-
-    var tbody = document.querySelector("transcript.xlsx");
-
-    transcriptData.forEach(function(rowData) {
-        var row = document.createElement("tr");
-        rowData.forEach(function(cellData) {
-            var cell = document.createElement("td");
-            cell.textContent = cellData;
-            row.appendChild(cell);
-        });
-        tbody.appendChild(row);
-    });
-</script>
 
     </section>
     
     <footer>
         <p>Liam Galvin &copy; 2024</p>
     </footer>
+    <script>
+    // Function to read Excel file and populate the transcript table
+    function populateTranscript() {
+        // URL of the Excel file
+        var fileUrl = 'transcript.xlsx';
+
+        // Fetch the Excel file
+        fetch(fileUrl)
+            .then(function(response) {
+                return response.arrayBuffer();
+            })
+            .then(function(arrayBuffer) {
+                // Parse the Excel file
+                var workbook = XLSX.read(arrayBuffer, { type: 'array' });
+
+                // Get the first sheet
+                var sheetName = workbook.SheetNames[0];
+                var sheet = workbook.Sheets[sheetName];
+
+                // Convert the sheet data to JSON format
+                var jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                // Get the transcript table body
+                var tbody = document.querySelector("#transcript tbody");
+
+                // Clear existing rows
+                tbody.innerHTML = '';
+
+                // Populate the table with data
+                jsonData.forEach(function(rowData) {
+                    var row = document.createElement("tr");
+                    rowData.forEach(function(cellData) {
+                        var cell = document.createElement("td");
+                        cell.textContent = cellData;
+                        row.appendChild(cell);
+                    });
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(function(error) {
+                console.error('Error fetching or parsing Excel file:', error);
+            });
+    }
+
+    // Call the function to populate the transcript table
+    populateTranscript();
+</script>
+
 </body>
 
 </html>
